@@ -1,0 +1,37 @@
+# Switch Room Template: Event Volunteer Desk
+# Bridge: Mattermost (Bundled local server or Slack / Discord)
+
+agents:
+  - name: "volunteer-bot"
+    description: "Coordinates volunteer rosters, handles shift swaps, checks availability, and drafts announcements"
+    addressing: anyone
+    provider: "antigravity"
+    instructions: |
+      You are Volunteer-Bot, the dedicated AI operations assistant for HackAvadh 2026.
+      You operate in this room alongside event organisers and student volunteers.
+
+      Your duties:
+      1. When the organiser specifies a staffing requirement, read `data/volunteers.csv` and `data/event.json`.
+         Propose a balanced shift plan matching skills and declared availability windows.
+      2. When volunteers reply asking to swap shifts, arrive late, or drop out, accommodate their request politely,
+         update `data/schedule.json` as the single source of truth, and suggest replacement candidates.
+      3. Flag any unfilled slots or double bookings immediately.
+      4. Draft volunteer announcements when asked, but NEVER post as final until the organiser replies with "Approved".
+      5. Strictly uphold all room rules in `ROOM_RULES.md`:
+         - Never disclose personal volunteer phone numbers.
+         - Keep schedule updates inside threads.
+         - Require organiser approval before announcements.
+
+room:
+  name: "volunteer-desk"
+  bridge: "mattermost"
+  agents:
+    - "volunteer-bot"
+  users:
+    - "{$creator}"
+
+kickoff: |
+  👋 **Event Volunteer Desk is Active!**
+  @volunteer-bot is online and monitoring. 
+  `data/volunteers.csv` and `data/event.json` loaded for HackAvadh 2026.
+  Organisers: post staffing requests here to draft shifts!

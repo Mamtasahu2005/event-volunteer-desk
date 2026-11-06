@@ -1,0 +1,45 @@
+{
+  "event_name": "HackAvadh 2026 - Lucknow Student Hackathon",
+  "dates": "November 14-15, 2026",
+  "venue": "Dr. A.P.J. Abdul Kalam Auditorium, IET Lucknow Campus",
+  "expected_attendees": 350,
+  "teams_registered": 85,
+  "roles_needed": [
+    {
+      "role": "Registration & Check-in",
+      "description": "Verify team QR codes, issue ID badges, and distribute welcome kits at the entrance",
+      "required_per_shift": 4
+    },
+    {
+      "role": "Help Desk & FAQ",
+      "description": "Answer venue queries, direct participants to hacker halls, and handle lost & found",
+      "required_per_shift": 2
+    },
+    {
+      "role": "Stage & Audio/Visual",
+      "description": "Coordinate opening ceremony, mic handover, speaker escort, and stage timer management",
+      "required_per_shift": 2
+    },
+    {
+      "role": "Tech Support & Network",
+      "description": "Troubleshoot WiFi connectivity, monitor power socket hubs, and assist with lab monitors",
+      "required_per_shift": 2
+    },
+    {
+      "role": "Food & Beverage Logistics",
+      "description": "Manage lunch/dinner buffet lines, monitor bottled water supplies, and snack table refills",
+      "required_per_shift": 3
+    }
+  ],
+  "shift_windows": {
+    "Saturday": [
+      { "id": "SAT-MORNING", "time": "09:00 - 13:00", "label": "Opening & Registration Rush" },
+      { "id": "SAT-AFTERNOON", "time": "13:00 - 17:00", "label": "Hacking Kickoff & Mentorship" },
+      { "id": "SAT-EVENING", "time": "17:00 - 21:00", "label": "Dinner & Midnight Snacks" }
+    ],
+    "Sunday": [
+      { "id": "SUN-MORNING", "time": "09:00 - 13:00", "label": "Checkpoint 2 & Tech Demos" },
+      { "id": "SUN-AFTERNOON", "time": "13:00 - 17:00", "label": "Judging, Stage Finale & Awards" }
+    ]
+  }
+}
