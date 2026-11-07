@@ -36,12 +36,32 @@ flowchart TD
     D --> E["Handoff: @volunteer-bot names @roster-checker"]
     E --> F["roster-checker runs validate_schedule.py, posts real output"]
     F --> G{"Validator OK?"}
-    G -- "No" --> D
-    G -- "Yes" --> H["Agent drafts announcement (locked)"]
-    H --> I{"Organiser replies 'Approved'?"}
-    I -- "Yes" --> J["Announcement published, schedule confirmed"]
-    I -- "No" --> D
+    G -- "No (e.g. availability conflict)" --> H["volunteer-bot reverts change, picks replacement with print_gaps.py"]
+    H --> D
+    G -- "Yes" --> I["Agent drafts announcement (locked)"]
+    I --> J{"Organiser replies 'Approved'?"}
+    J -- "Yes" --> K["Announcement published, schedule confirmed"]
+    J -- "No" --> D
 ```
+
+---
+
+## Why Two Agents?
+
+Single-agent systems often hallucinate adherence to rules: an agent asked to "check the roster" frequently declares that everything looks fine without verifying constraints.
+
+By splitting operations into two complementary agents with separate addressing scopes in Switch:
+
+1. **`@volunteer-bot` (The Coordinator):**
+   * Scope: `anyone`.
+   * Role: Listens to the organiser and volunteers, understands conversational shift requests, reads availability and skills, proposes shift allocations, and writes to `data/schedule.json`.
+   * Constraint: Forbidden from certifying its own work or broadcasting announcements without approval.
+2. **`@roster-checker` (The Auditor):**
+   * Scope: `owner-agents`.
+   * Role: Activated exclusively via explicit agent handoff (`@roster-checker ...`).
+   * Constraint: Forbidden from editing schedules or drafting messages; its sole job is executing `python scripts/validate_schedule.py` and quoting the real terminal output directly into the thread.
+
+This strict separation enforces accountability: a mistake made by the coordinator (such as scheduling a volunteer whose availability window ends early) is immediately caught by the auditor before any human sees an announcement.
 
 ---
 
@@ -58,11 +78,52 @@ event-volunteer-desk/
 ├── scripts/
 │   ├── validate_schedule.py       # Checks capacity, double bookings, availability, skills, overlaps
 │   ├── print_gaps.py              # Reports unfilled shifts + available, unbooked candidates
-│   └── reset_demo.py              # Restores schedule.json to the clean demo state
+│   ├── reset_demo.py              # Restores schedule.json to the clean demo state
+│   └── apply_scene.py             # Applies any demo scene fixture to data/schedule.json
 ├── tests/
-│   └── test_validate.py           # pytest suite for the validator (13 tests)
-└── demo/
-    └── DEMO_SCRIPT.md             # Scene-by-scene recording script, validated per scene
+│   └── test_validate.py           # pytest suite for the validator and demo fixtures (15 tests)
+├── demo/
+│   ├── DEMO_SCRIPT.md             # Scene-by-scene recording script, validated per scene
+│   └── fixtures/                  # Ground-truth JSON fixtures for scenes 0 through 5
+└── docs/
+    └── screenshots/               # Walkthrough screenshots for Switch Console and room flow
+        └── .gitkeep
+```
+
+---
+
+## Run the Checks Yourself
+
+You can clone this repository and reproduce all deterministic validation checks in seconds:
+
+```bash
+# 1. Install pytest (if not already installed)
+pip install pytest
+
+# 2. Reset schedule to clean starting state
+python scripts/reset_demo.py
+
+# 3. Run the validator on the clean schedule (passes with 0/34 filled)
+python scripts/validate_schedule.py
+
+# 4. Run the gap finder to inspect open shifts and matching candidate recommendations
+python scripts/print_gaps.py
+
+# 5. Run the full pytest test suite (15 tests covering all edge cases and fixtures)
+python -m pytest -q
+
+# 6. Witness the real validator catch an availability conflict in Scene 3:
+python scripts/apply_scene.py 3
+python scripts/validate_schedule.py
+# (Fails with: [X] Availability: 'Aarav Sharma' (09:00-14:00) cannot cover SAT-AFTERNOON)
+
+# 7. Apply the fixed Scene 3 state and verify it passes:
+python scripts/apply_scene.py 3-fixed
+python scripts/validate_schedule.py
+# (Passes with: [OK] All assignments valid! 8 / 34 required slots)
+
+# 8. Reset back to clean state when done
+python scripts/reset_demo.py
 ```
 
 ---
@@ -93,20 +154,12 @@ event-volunteer-desk/
    * Advanced (folded): provider, machine/location, working directory, and the messaging app (bridge) — defaults pick the first installed provider, this machine, a shared folder under the agents directory, and the server's default app (Mattermost on the bundled server).
 5. Click **Create**. Switch creates the `volunteer-desk` room in Mattermost, puts both agents and you in it, installs the room rules, and posts the kickoff (each agent says hello in one line).
 
-### 4. Run the Checks
-```bash
-pip install pytest        # once, for the test suite
-python scripts/reset_demo.py        # clean starting roster
-python scripts/validate_schedule.py # validate the current schedule.json
-python scripts/print_gaps.py        # unfilled shifts + eligible candidates
-python -m pytest tests/ -v          # validator test suite
-```
-
 ---
 
 ## Tested vs Untested
 
-* **Tested:** the full flow was run on **Mattermost** via the bundled local Switch server; the validator, gap finder, and tests were run locally with the sample data.
+* **Tested locally:** validator, gap finder, demo fixtures and pytest suite.
+* **Live Switch run on Mattermost:** shown in the demo video.
 * **Untested:** Switch's Slack and Discord bridges should work (the template takes any bridge the server has), but they have not been tried for this project.
 * All names, emails, and availability rows in `data/` are **sample data** for the demo, not real volunteers.
 
@@ -114,13 +167,13 @@ python -m pytest tests/ -v          # validator test suite
 
 ## How to Run the Demo
 
-Follow the scene-by-scene script in [`demo/DEMO_SCRIPT.md`](demo/DEMO_SCRIPT.md). In short:
+Follow the scene-by-scene script in [`demo/DEMO_SCRIPT.md`](demo/DEMO_SCRIPT.md):
 
-1. **Staffing request:** the organiser asks @volunteer-bot to staff the Saturday morning shift.
-2. **Proposal + handoff:** the agent proposes a roster respecting skills and availability, writes `data/schedule.json`, and hands off to @roster-checker, which posts the validator's real output.
-3. **Swap:** a volunteer says he can only arrive at 11:00; the agent moves him to the afternoon shift and hands off to roster-checker again.
-4. **Announcement gate:** the agent drafts the announcement (naming only confirmed volunteers, stating gaps openly) but does not publish.
-5. **Sign-off:** the organiser replies "Approved"; the announcement is published and the schedule is marked confirmed, with one final validation.
+1. **Scene 1 (Staffing request):** the organiser asks @volunteer-bot to staff the Saturday morning shift. Bot proposes roster, writes `schedule.json`, hands off to @roster-checker, which validates OK.
+2. **Scene 2 (Volunteer shift modification):** volunteer Rohan notes he arrives at 11:00. Bot puts him in afternoon Tech Support and hands off to checker (validates OK).
+3. **Scene 3 (Checker catches mistake & bot fixes it):** bot tries adding Aarav Sharma to the afternoon shift. Roster-checker flags availability error. Bot rolls back, runs `print_gaps.py`, assigns Divya Rawat, and re-check passes.
+4. **Scene 4 (Afternoon roster extension & announcement draft):** bot finishes filling afternoon shift, notes open Help Desk gap, hands off to checker, and drafts announcement.
+5. **Scene 5 (Human-in-the-loop sign-off & publication):** organiser replies "Approved", announcement is published, schedule marked confirmed, with one final validation.
 
 ---
 
@@ -128,10 +181,10 @@ Follow the scene-by-scene script in [`demo/DEMO_SCRIPT.md`](demo/DEMO_SCRIPT.md)
 
 | Interaction | Preview |
 | :--- | :--- |
-| **Switch Console & Agent Status** | *`[Placeholder: Screenshot of Switch Console showing both agents registered]`* |
-| **Shift Proposal in Mattermost** | *`[Placeholder: Screenshot of threaded roster proposal in #volunteer-desk]`* |
-| **Roster-Checker Validation** | *`[Placeholder: Screenshot of roster-checker posting the validator output]`* |
-| **Approval Protocol Gate** | *`[Placeholder: Screenshot of agent waiting for organiser approval before posting]`* |
+| **Switch Console & Agent Status** | `![Switch Console](docs/screenshots/01-console-agents.png)`<br>*`[Placeholder: Screenshot of Switch Console showing both agents registered]`* |
+| **Shift Proposal in Mattermost** | `![Roster Proposal](docs/screenshots/02-roster-proposal.png)`<br>*`[Placeholder: Screenshot of threaded roster proposal in #volunteer-desk]`* |
+| **Checker Catches Mistake & Bot Fixes It** | `![Checker Catches Error](docs/screenshots/03-checker-catches-error.png)`<br>*`[Placeholder: Screenshot of roster-checker reporting real error and bot resolving it]`* |
+| **Approval Protocol Gate & Confirmed** | `![Approval Gate](docs/screenshots/04-approval-gate.png)`<br>*`[Placeholder: Screenshot of organiser approval and confirmed publication]`* |
 
 **Demo Video Link:** *`[Placeholder: Insert YouTube / Loom 2-minute demo link here]`*
 

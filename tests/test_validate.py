@@ -196,3 +196,39 @@ def test_skills_match_keyword_map():
     assert skills_match("Tech Support, WiFi", "Tech Support & Network")
     assert not skills_match("Registration, Check-in", "Tech Support & Network")
     assert skills_match("Anything", "Mystery Role")  # unmapped role accepts anyone
+
+
+# ----------------------------------------------------------- demo fixture tests
+
+def test_demo_failing_fixture_detected():
+    """Scene 3 failing fixture: Aarav Sharma in SAT-AFTERNOON fails availability."""
+    import csv
+    import json
+    base_dir = Path(__file__).resolve().parents[1]
+    with open(base_dir / "data" / "volunteers.csv", "r", encoding="utf-8", newline="") as f:
+        volunteers = list(csv.DictReader(f))
+    with open(base_dir / "data" / "event.json", "r", encoding="utf-8") as f:
+        event = json.load(f)
+    with open(base_dir / "demo" / "fixtures" / "scene_3_failing.json", "r", encoding="utf-8") as f:
+        schedule = json.load(f)
+
+    issues = validate(schedule, volunteers, event)
+    assert len(issues) == 1
+    assert "Availability: 'Aarav Sharma'" in issues[0]
+    assert "cannot cover SAT-AFTERNOON" in issues[0]
+
+
+def test_demo_fixed_fixture_passes():
+    """Scene 3 fixed fixture: Divya Rawat in SAT-AFTERNOON passes validation."""
+    import csv
+    import json
+    base_dir = Path(__file__).resolve().parents[1]
+    with open(base_dir / "data" / "volunteers.csv", "r", encoding="utf-8", newline="") as f:
+        volunteers = list(csv.DictReader(f))
+    with open(base_dir / "data" / "event.json", "r", encoding="utf-8") as f:
+        event = json.load(f)
+    with open(base_dir / "demo" / "fixtures" / "scene_3_fixed.json", "r", encoding="utf-8") as f:
+        schedule = json.load(f)
+
+    issues = validate(schedule, volunteers, event)
+    assert issues == []

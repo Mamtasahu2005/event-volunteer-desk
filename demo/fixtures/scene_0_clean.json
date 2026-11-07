@@ -1,0 +1,89 @@
+{
+  "last_updated": "2026-11-07T07:34:53Z",
+  "status": "draft",
+  "shifts": {
+    "SAT-MORNING": {
+      "slot": "Saturday 09:00 - 13:00",
+      "Registration & Check-in": {
+        "required": 4,
+        "assigned": [],
+        "pending": []
+      },
+      "Help Desk & FAQ": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Stage & Audio/Visual": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Food & Beverage Logistics": {
+        "required": 3,
+        "assigned": [],
+        "pending": []
+      }
+    },
+    "SAT-AFTERNOON": {
+      "slot": "Saturday 13:00 - 17:00",
+      "Registration & Check-in": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Help Desk & FAQ": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Tech Support & Network": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Food & Beverage Logistics": {
+        "required": 3,
+        "assigned": [],
+        "pending": []
+      }
+    },
+    "SUN-MORNING": {
+      "slot": "Sunday 09:00 - 13:00",
+      "Help Desk & FAQ": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Tech Support & Network": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Stage & Audio/Visual": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      }
+    },
+    "SUN-AFTERNOON": {
+      "slot": "Sunday 13:00 - 17:00",
+      "Stage & Audio/Visual": {
+        "required": 3,
+        "assigned": [],
+        "pending": []
+      },
+      "Food & Beverage Logistics": {
+        "required": 3,
+        "assigned": [],
+        "pending": []
+      },
+      "Help Desk & FAQ": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      }
+    }
+  },
+  "change_log": []
+}

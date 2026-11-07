@@ -1,0 +1,119 @@
+{
+  "last_updated": "2026-11-14T09:35:00Z",
+  "status": "draft",
+  "shifts": {
+    "SAT-MORNING": {
+      "slot": "Saturday 09:00 - 13:00",
+      "Registration & Check-in": {
+        "required": 4,
+        "assigned": [
+          "Aarav Sharma",
+          "Kavita Mishra"
+        ],
+        "pending": []
+      },
+      "Help Desk & FAQ": {
+        "required": 2,
+        "assigned": [
+          "Ananya Singh"
+        ],
+        "pending": []
+      },
+      "Stage & Audio/Visual": {
+        "required": 2,
+        "assigned": [
+          "Priya Verma",
+          "Neha Saxena"
+        ],
+        "pending": []
+      },
+      "Food & Beverage Logistics": {
+        "required": 3,
+        "assigned": [
+          "Mohd. Zaid"
+        ],
+        "pending": []
+      }
+    },
+    "SAT-AFTERNOON": {
+      "slot": "Saturday 13:00 - 17:00",
+      "Registration & Check-in": {
+        "required": 2,
+        "assigned": [
+          "Aarav Sharma"
+        ],
+        "pending": []
+      },
+      "Help Desk & FAQ": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Tech Support & Network": {
+        "required": 2,
+        "assigned": [
+          "Rohan Gupta"
+        ],
+        "pending": []
+      },
+      "Food & Beverage Logistics": {
+        "required": 3,
+        "assigned": [],
+        "pending": []
+      }
+    },
+    "SUN-MORNING": {
+      "slot": "Sunday 09:00 - 13:00",
+      "Help Desk & FAQ": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Tech Support & Network": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      },
+      "Stage & Audio/Visual": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      }
+    },
+    "SUN-AFTERNOON": {
+      "slot": "Sunday 13:00 - 17:00",
+      "Stage & Audio/Visual": {
+        "required": 3,
+        "assigned": [],
+        "pending": []
+      },
+      "Food & Beverage Logistics": {
+        "required": 3,
+        "assigned": [],
+        "pending": []
+      },
+      "Help Desk & FAQ": {
+        "required": 2,
+        "assigned": [],
+        "pending": []
+      }
+    }
+  },
+  "change_log": [
+    {
+      "timestamp": "2026-11-14T09:15:00Z",
+      "author": "volunteer-bot",
+      "action": "Drafted SAT-MORNING roster with 6 initial assignments based on volunteers.csv"
+    },
+    {
+      "timestamp": "2026-11-14T09:25:00Z",
+      "author": "volunteer-bot",
+      "action": "Assigned Rohan Gupta to SAT-AFTERNOON Tech Support (exam ends 10:30, available from 11:00)"
+    },
+    {
+      "timestamp": "2026-11-14T09:35:00Z",
+      "author": "volunteer-bot",
+      "action": "Added Aarav Sharma to SAT-AFTERNOON Registration & Check-in"
+    }
+  ]
+}

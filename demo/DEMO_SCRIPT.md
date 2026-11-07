@@ -4,9 +4,9 @@ This script walks through an end-to-end interaction between **Organiser Priya**,
 **Volunteer Rohan**, and the **two agents (@volunteer-bot and @roster-checker)**
 inside the Switch `#volunteer-desk` room.
 
-Every roster below was checked with `python scripts/validate_schedule.py`
-against `data/volunteers.csv` and `data/event.json` — each scene's expected
-`schedule.json` state passes validation (evidence at the end). Run
+Every roster state below was tested with `python scripts/validate_schedule.py`
+against `data/volunteers.csv` and `data/event.json`. Each fixture is saved in
+`demo/fixtures/` and can be loaded with `python scripts/apply_scene.py <N>`. Run
 `python scripts/reset_demo.py` before recording so you start from the clean
 empty roster.
 
@@ -20,6 +20,8 @@ empty roster.
 
 Availability facts used below (from `data/volunteers.csv`):
 * Rohan Gupta is free Saturday **from 11:00** — he is never placed in the 9 AM shift.
+* Aarav Sharma is free 09:00–14:00 — he cannot cover the 13:00–17:00 afternoon shift.
+* Divya Rawat is free 13:00–18:00 — she is the ideal Saturday afternoon registration replacement.
 * Sana Khan is free 10:00–16:00, so she covers no full shift window and is not assigned.
 * Saturday shift windows: morning 09:00–13:00, afternoon 13:00–17:00.
 
@@ -70,7 +72,7 @@ Ran `python scripts/validate_schedule.py` in my working directory. Exact output:
 ============================================================
 Schedule Validation Report
    Status: DRAFT
-   Last Updated: <timestamp>
+   Last Updated: 2026-11-14T09:15:00Z
    Total Filled: 6 / 34 required slots
 ============================================================
 
@@ -112,7 +114,7 @@ Ran `python scripts/validate_schedule.py`. Exact output:
 ============================================================
 Schedule Validation Report
    Status: DRAFT
-   Last Updated: <timestamp>
+   Last Updated: 2026-11-14T09:25:00Z
    Total Filled: 7 / 34 required slots
 ============================================================
 
@@ -123,7 +125,73 @@ Validation passed.
 
 ---
 
-## Scene 3: Organiser Extends the Afternoon Roster, Then Asks for the Announcement
+## Scene 3: Checker Catches an Availability Mistake & Bot Resolves It
+
+**User:** `priya_lead` (Replying in the thread)
+```text
+@volunteer-bot please add registration coverage for Saturday afternoon (SAT-AFTERNOON 13:00 - 17:00). We want to make sure check-in stays open.
+```
+
+**Expected Agent Response:** `@volunteer-bot` (Threaded reply)
+```text
+Adding Aarav Sharma to SAT-AFTERNOON Registration & Check-in since he handles registration in the morning.
+
+data/schedule.json updated with a change_log entry.
+
+@roster-checker please validate the updated data/schedule.json.
+```
+
+**Expected Agent Response:** `@roster-checker` (Threaded reply — REAL failure output)
+```text
+Ran `python scripts/validate_schedule.py`. Exact output:
+
+============================================================
+Schedule Validation Report
+   Status: DRAFT
+   Last Updated: 2026-11-14T09:35:00Z
+   Total Filled: 8 / 34 required slots
+============================================================
+
+Found Issues:
+  [X] Availability: 'Aarav Sharma' (09:00-14:00) cannot cover SAT-AFTERNOON (Saturday 13:00 - 17:00) on Saturday.
+
+Validation failed.
+```
+
+**Expected Agent Response:** `@volunteer-bot` (Threaded reply — revert and smart replacement)
+```text
+Good catch @roster-checker! Aarav's declared Saturday availability is 09:00-14:00, which leaves at 14:00 and cannot cover the full 13:00-17:00 shift.
+
+I have reverted Aarav Sharma from SAT-AFTERNOON Registration & Check-in and logged the rollback in change_log.
+
+Running `scripts/print_gaps.py` to find eligible, available candidates with Registration skills:
+Suggested candidate: Divya Rawat (available 13:00-18:00 on Saturday; note: 'Prefers afternoon on Sat').
+
+I have assigned Divya Rawat to SAT-AFTERNOON Registration & Check-in.
+data/schedule.json updated.
+
+@roster-checker please re-validate data/schedule.json.
+```
+
+**Expected Agent Response:** `@roster-checker` (Threaded reply — re-check passes)
+```text
+Ran `python scripts/validate_schedule.py`. Exact output:
+
+============================================================
+Schedule Validation Report
+   Status: DRAFT
+   Last Updated: 2026-11-14T09:37:00Z
+   Total Filled: 8 / 34 required slots
+============================================================
+
+[OK] All assignments valid! No conflicts or double-bookings detected.
+
+Validation passed.
+```
+
+---
+
+## Scene 4: Organiser Extends the Afternoon Roster, Then Asks for the Announcement
 
 **User:** `priya_lead` (Replying in the thread)
 ```text
@@ -154,7 +222,7 @@ Ran `python scripts/validate_schedule.py`. Exact output:
 ============================================================
 Schedule Validation Report
    Status: DRAFT
-   Last Updated: <timestamp>
+   Last Updated: 2026-11-14T09:45:00Z
    Total Filled: 11 / 34 required slots
 ============================================================
 
@@ -192,7 +260,7 @@ Draft prepared. Awaiting organiser sign-off before publishing.
 
 ---
 
-## Scene 4: Human-in-the-Loop Sign-Off and Publication
+## Scene 5: Human-in-the-Loop Sign-Off and Publication
 
 **User:** `priya_lead`
 ```text
@@ -214,7 +282,7 @@ Ran `python scripts/validate_schedule.py`. Exact output:
 ============================================================
 Schedule Validation Report
    Status: CONFIRMED
-   Last Updated: <timestamp>
+   Last Updated: 2026-11-14T10:00:00Z
    Total Filled: 11 / 34 required slots
 ============================================================
 
@@ -225,32 +293,37 @@ Validation passed.
 
 ---
 
-## Validation Evidence (run before writing this script)
+## Validation Evidence (Tested Against Real Validator)
 
-Each scene's expected `schedule.json` state was written to
-`data/schedule.json` and checked with the real validator:
+Every fixture is saved under `demo/fixtures/` and verified with `python scripts/validate_schedule.py`:
 
-| Scene | State | `validate_schedule.py` result |
-| :--- | :--- | :--- |
-| 1 | SAT-MORNING: 6 volunteers assigned | exit 0 — all assignments valid |
-| 2 | + Rohan in SAT-AFTERNOON Tech Support | exit 0 — all assignments valid |
-| 3 | + Divya, Ayush, Vikram in SAT-AFTERNOON | exit 0 — all assignments valid |
-| 4 | status `confirmed`, no assignment change | exit 0 — all assignments valid |
+| Scene | Fixture File | State | Exit Code | Real Validator Output |
+| :--- | :--- | :--- | :--- | :--- |
+| **0** | `scene_0_clean.json` | Clean reset (empty) | `0` | `[OK] All assignments valid! 0 / 34` |
+| **1** | `scene_1_proposal.json` | SAT-MORNING: 6 assigned | `0` | `[OK] All assignments valid! 6 / 34` |
+| **2** | `scene_2_swap.json` | + Rohan in SAT-AFTERNOON Tech | `0` | `[OK] All assignments valid! 7 / 34` |
+| **3 (fail)** | `scene_3_failing.json` | + Aarav in SAT-AFTERNOON Reg | `1` | `[X] Availability: 'Aarav Sharma' (09:00-14:00) cannot cover SAT-AFTERNOON` |
+| **3 (fixed)**| `scene_3_fixed.json` | Replaced with Divya Rawat | `0` | `[OK] All assignments valid! 8 / 34` |
+| **4** | `scene_4_announcement.json` | + Ayush, Zaid, Vikram (11 filled) | `0` | `[OK] All assignments valid! 11 / 34` |
+| **5** | `scene_5_confirmed.json` | Status `confirmed`, 11 filled | `0` | `[OK] All assignments valid! 11 / 34` |
 
-Notes on rules kept:
+Rules kept throughout:
 * Rohan Gupta never appears in a shift starting before 11:00 Saturday.
-* No volunteer is in two overlapping shifts; Zaid's back-to-back 09:00-13:00
-  and 13:00-17:00 shifts are adjacent, not overlapping, and both are inside
-  his 09:00-17:00 window.
-* Every assigned person's skills match their role via the keyword map in
-  `scripts/validate_schedule.py`.
-* The announcement names only volunteers present in `schedule.json`; unfilled
-  gaps are stated as gaps, not hidden.
+* Aarav Sharma leaves at 14:00, so he cannot cover the 13:00-17:00 shift (caught by the validator in Scene 3).
+* No volunteer is in two overlapping shifts; Zaid's back-to-back 09:00-13:00 and 13:00-17:00 shifts are adjacent, not overlapping.
+* Every assigned person's skills match their role via the keyword map in `scripts/validate_schedule.py`.
+* The announcement names only volunteers present in `schedule.json`; unfilled gaps are stated openly.
 
-## Recording Checklist (before you hit record)
+## Recording Checklist (Before You Hit Record)
 
-1. `python scripts/reset_demo.py` — restores the clean empty roster.
-2. `python scripts/validate_schedule.py` — should print `[OK] ... 0 / 34`.
-3. Record the four scenes in order; after each bot edit of
-   `data/schedule.json`, wait for the `@roster-checker` validation reply.
-4. If a take goes wrong, run step 1 again and re-record.
+1. `python scripts/reset_demo.py` — restores the clean empty roster (`0 / 34`).
+2. Alternatively, use `python scripts/apply_scene.py <scene>` to jump to any scene state:
+   * `python scripts/apply_scene.py 0` (clean starting state)
+   * `python scripts/apply_scene.py 1` (after Scene 1 proposal)
+   * `python scripts/apply_scene.py 2` (after Scene 2 shift swap)
+   * `python scripts/apply_scene.py 3` (Scene 3 failing state)
+   * `python scripts/apply_scene.py 3-fixed` (Scene 3 resolved state)
+   * `python scripts/apply_scene.py 4` (Scene 4 announcement draft)
+   * `python scripts/apply_scene.py 5` (Scene 5 confirmed state)
+3. Record the five scenes in order; after each bot edit of `data/schedule.json`, wait for the `@roster-checker` validation reply.
+4. If a take goes wrong, run `python scripts/reset_demo.py` again.
