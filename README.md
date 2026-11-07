@@ -159,7 +159,7 @@ python scripts/reset_demo.py
 ## Tested vs Untested
 
 * **Tested locally:** validator, gap finder, demo fixtures and pytest suite.
-* **Live Switch run on Mattermost:** shown in the demo video.
+* **Live Switch run on Mattermost:** not recorded for this submission.
 * **Untested:** Switch's Slack and Discord bridges should work (the template takes any bridge the server has), but they have not been tried for this project.
 * All names, emails, and availability rows in `data/` are **sample data** for the demo, not real volunteers.
 
@@ -177,16 +177,9 @@ Follow the scene-by-scene script in [`demo/DEMO_SCRIPT.md`](demo/DEMO_SCRIPT.md)
 
 ---
 
-## Screenshots & Demo Video Placeholders
+## Screenshots & Demo Video
 
-| Interaction | Preview |
-| :--- | :--- |
-| **Switch Console & Agent Status** | `![Switch Console](docs/screenshots/01-console-agents.png)`<br>*`[Placeholder: Screenshot of Switch Console showing both agents registered]`* |
-| **Shift Proposal in Mattermost** | `![Roster Proposal](docs/screenshots/02-roster-proposal.png)`<br>*`[Placeholder: Screenshot of threaded roster proposal in #volunteer-desk]`* |
-| **Checker Catches Mistake & Bot Fixes It** | `![Checker Catches Error](docs/screenshots/03-checker-catches-error.png)`<br>*`[Placeholder: Screenshot of roster-checker reporting real error and bot resolving it]`* |
-| **Approval Protocol Gate & Confirmed** | `![Approval Gate](docs/screenshots/04-approval-gate.png)`<br>*`[Placeholder: Screenshot of organiser approval and confirmed publication]`* |
-
-**Demo Video Link:** *`[Placeholder: Insert YouTube / Loom 2-minute demo link here]`*
+Live Switch run on Mattermost: not recorded for this submission. All core shift-scheduling operations, the two-agent coordinator/checker handoff protocol, gap identification, and deterministic constraint validation rules are fully verified locally via test fixtures and the automated pytest suite.
 
 ---
 
