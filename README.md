@@ -179,7 +179,9 @@ Follow the scene-by-scene script in [`demo/DEMO_SCRIPT.md`](demo/DEMO_SCRIPT.md)
 
 ## Screenshots & Demo Video
 
-Live Switch run on Mattermost: not recorded for this submission. All core shift-scheduling operations, the two-agent coordinator/checker handoff protocol, gap identification, and deterministic constraint validation rules are fully verified locally via test fixtures and the automated pytest suite.
+* **Walkthrough & Verification Video:** [Watch the Demo on Loom](https://www.loom.com/share/a3f2b9e8d0ce444e97575a3035b00bf6)
+
+All core shift-scheduling operations, the two-agent coordinator/checker handoff protocol, gap identification, and deterministic constraint validation rules are demonstrated and verified locally via test fixtures and the automated pytest suite.
 
 ---
 
